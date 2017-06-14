@@ -1,0 +1,18 @@
+---
+magento_public_key: "9a0d7b6aa28bd176049fb464212d7612"
+magento_private_key: "fe96d4f4be992cc50ea254cfc5bc137a"
+
+magento_base_url: "http://{{ nex_user_domain }}/"
+magento_db_host: "{{ db_backnet_addrs[0] }}"
+magento_db_name: "{{ nex_app_db_name }}"
+magento_db_user: "{{ nex_app_db_user }}"
+magento_db_pass: "{{ nex_app_db_pass }}"
+magento_admin_firstname: "Magento"
+magento_admin_lastname: "User"
+magento_admin_email: "example@user.com"
+magento_admin_user: "admin"
+magento_admin_pass: "111please/override/me222"
+magento_backend_frontname: "admin"
+magento_lang: "en_US"
+magento_currency: "USD"
+magento_timezone: "America/New_York"

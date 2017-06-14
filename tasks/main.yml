@@ -1,0 +1,127 @@
+---
+
+- name: Make Sure ~/.composer exists
+  file:
+    path="{{ nex_app_unix_home }}/.composer"
+    state="directory"
+    mode=2751
+  sudo: yes
+  sudo_user: "{{ nex_app_unix_user }}"
+  when:
+    - inventory_hostname == groups['fpm'][0]
+
+- name: Install Composer auth.json
+  template:
+    src="auth.json.j2"
+    dest="{{ nex_app_unix_home }}/.composer/auth.json"
+    mode="0644"
+  sudo: yes
+  sudo_user: "{{ nex_app_unix_user }}"
+  when:
+    - inventory_hostname == groups['fpm'][0]
+
+- name: Register Contents Of Doc Root
+  command: "ls {{ nex_app_doc_root }}"
+  register: doc_root_contents
+  when:
+    - inventory_hostname == groups['fpm'][0]
+
+- name: Install Magento
+  composer:
+    command="create-project"
+    arguments="--repository-url=https://repo.magento.com/ magento/project-community-edition {{ nex_app_doc_root }}"
+    working_dir="{{ nex_app_unix_home }}"
+  sudo: yes
+  sudo_user: "{{ nex_app_unix_user }}"
+  when:
+    - inventory_hostname == groups['fpm'][0]
+    - doc_root_contents.stdout == ""
+
+- name: Fix Perms
+  shell: find var vendor pub/static pub/media app/etc -type f -exec chmod u+w {} \; && find var vendor pub/static pub/media app/etc -type d -exec chmod u+w {} \; && chmod u+x bin/magento
+  args:
+    chdir: "{{ nex_app_doc_root }}"
+  sudo: yes
+  sudo_user: "{{ nex_app_unix_user }}"
+  when:
+    - inventory_hostname == groups['fpm'][0]
+    - doc_root_contents.stdout == ""
+
+- name: Magento Fresh Install
+  shell: >
+    ./magento setup:install 
+    --base-url=http://{{ nex_user_domain }}/
+    --db-host={{ magento_db_host }} 
+    --db-name={{ magento_db_name }}
+    --db-user={{ magento_db_user }}
+    --db-password={{ magento_db_pass }}
+    --admin-firstname={{ magento_admin_firstname }} 
+    --admin-lastname={{ magento_admin_lastname }} 
+    --admin-email={{ magento_admin_email }}
+    --admin-user={{ magento_admin_user }}
+    --admin-password={{ magento_admin_pass }} 
+    --language={{ magento_lang }}
+    --currency={{ magento_currency }}
+    --timezone={{ magento_timezone }}
+    --backend-frontname={{ magento_backend_frontname }}
+    --cleanup-database
+    --sales-order-increment-prefix="ORD$" 
+    --session-save=db 
+    --use-rewrites=1
+  args:
+    chdir: "{{ nex_app_doc_root }}/bin"
+  sudo: yes
+  sudo_user: "{{ nex_app_unix_user }}"
+  when:
+    - inventory_hostname == groups['fpm'][0]
+
+#- name: Download Magento
+#  get_url: 
+#    url={{ magento_url }}
+#    dest=/tmp/magento.tar.gz
+#    mode=0644
+#  when:
+#    - server_role == "fs"    
+#
+#- name: Unarchive Magento
+#  command: > 
+#    tar 
+#    --strip 1 
+#    -xvzf 
+#    /tmp/magento.tar.gz
+#    chdir="{{ nfs_shared_path }}/{{ nex_app_dest }}" 
+#    creates="{{ nfs_shared_path }}/{{ nex_app_dest }}/index.php"
+#  sudo: yes
+#  sudo_user: "{{ nex_app_unix_user }}"
+#  when:
+#    - server_role == "fs"
+#
+#- name: Setup App Symlink To Shared Storage
+#  file:
+#    state=link
+#    src="{{ nfs_shared_path }}/{{ nex_app_dest }}"
+#    dest="{{ nex_app_root }}/{{ nex_app_dest }}"
+#    owner="{{ nex_app_unix_user }}"
+#    group="{{ nex_app_unix_group }}"
+#  when:
+#    - server_role == "fs" or server_role == "web" or server_role == "fpm"
+#
+#- name: Setup Docroot Symlink
+#  file:
+#    state=link
+#    src="{{ nex_app_root }}/{{ nex_app_dest }}"
+#    dest="{{ nex_app_root}}/public"
+#    owner="{{ nex_app_unix_user }}"
+#    group="{{ nex_app_unix_group }}"
+#  notify: restart php-fpm
+#  when:
+#    - server_role == "fs" or server_role == "web" or server_role == "fpm"
+#
+#- name: Run Composer Install
+#  composer:
+#    command="install"
+#    working_dir="{{ nex_app_root }}/{{ nex_app_dest }}"  
+#  sudo: yes
+#  sudo_user: "{{ nex_app_unix_user }}"
+#  when:
+#    - inventory_hostname == groups['fpm'][0]
