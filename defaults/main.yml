@@ -10,7 +10,7 @@ magento_client_repo: "https://github.com/nexpoehler/magento2-test.git"
 magento_deploy_branch: "master"
 
 magento_project_name: "magento/project-community-edition"
-magento_base_url: "https://{{ nex_user_domain }}/"
+magento_base_url: "http://{{ nex_user_domain }}/"
 magento_db_host: "{{ db_backnet_addrs[0] }}"
 magento_db_name: "{{ nex_app_db_name }}"
 magento_db_user: "{{ nex_app_db_user }}"
