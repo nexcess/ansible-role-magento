@@ -80,6 +80,7 @@
   when:
     - inventory_hostname == groups['fs'][0]
     - magento_fresh_install
+    - doc_root_contents.stdout == ""
     - magento_deploy_sample_data
 
 - name: Magento Fresh Install
@@ -112,6 +113,7 @@
   sudo_user: "{{ nex_app_unix_user }}"
   when:
     - inventory_hostname == groups['fs'][0]
+    - doc_root_contents.stdout == ""
     - magento_fresh_install
 
 - name: Update/Clone Client Repository
