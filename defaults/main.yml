@@ -6,8 +6,8 @@ magento_crypt_key: ""
 magento_fresh_install: false
 magento_deploy_sample_data: false
 
-magento_client_repo: "https://github.com/nexpoehler/magento2-test.git"
-magento_deploy_branch: "master"
+magento_client_repo: "{{ nex_app_git_repo }}"
+magento_deploy_branch: "{{ nex_app_git_branch | default(master) }}"
 
 magento_project_name: "magento/project-community-edition"
 magento_base_url: "http://{{ nex_user_domain }}/"
