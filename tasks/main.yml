@@ -154,14 +154,6 @@
     - inventory_hostname == groups['fs'][0]
     - not magento_fresh_install
     
-- name: Register stat_result_app_env
-  stat:
-    path="{{ nex_app_doc_root }}/app/etc/env.php"
-  register: stat_result_app_env
-  when:
-    - inventory_hostname == groups['fs'][0]
-    - not magento_fresh_install
-
 - name: Generate app/etc/env.php
   template:
     src="env.php.j2"
@@ -170,8 +162,6 @@
   sudo_user: "{{ nex_app_unix_user }}"
   when:
     - inventory_hostname == groups['fs'][0]
-    - not magento_fresh_install
-    - stat_result_app_env.stat.exists == false
     
 #- name: Upgrade magento
 #  shell: ./magento setup:upgrade
