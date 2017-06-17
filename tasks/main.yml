@@ -86,8 +86,8 @@
 - name: Magento Fresh Install
   shell: >
     ./magento setup:install 
-    --base-url=https://{{ nex_user_domain }}/
-    --base-url-secure=https://{{ nex_user_domain }}/
+    --base-url={{ magento_base_url }}
+    --base-url-secure={{ magento_base_url }}
     --use-secure=1
     --use-secure-admin=1
     --db-host={{ magento_db_host }} 
