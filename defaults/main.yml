@@ -1,6 +1,6 @@
 ---
-magento_public_key: "9a0d7b6aa28bd176049fb464212d7612"
-magento_private_key: "fe96d4f4be992cc50ea254cfc5bc137a"
+magento_public_key: "{{ nex_app_magento_public_key }}"
+magento_private_key: "{{ nex_app_magento_private_key }}"
 magento_crypt_key: ""
 
 magento_fresh_install: false
@@ -10,7 +10,7 @@ magento_client_repo: "{{ nex_app_git_repo }}"
 magento_deploy_branch: "{{ nex_app_git_branch | default('master') }}"
 
 magento_project_name: "magento/project-community-edition"
-magento_base_url: "http://{{ nex_user_domain }}/"
+magento_base_url: "http://{{ nex_app_domain }}/"
 magento_db_host: "{{ db_backnet_addrs[0] }}"
 magento_db_name: "{{ nex_app_db_name }}"
 magento_db_user: "{{ nex_app_db_user }}"
@@ -23,4 +23,4 @@ magento_admin_pass: "111please/override/me222"
 magento_backend_frontname: "admin"
 magento_lang: "en_US"
 magento_currency: "USD"
-magento_timezone: "America/New_York"
+magento_timezone: "{{ ntp_timezone }}"
