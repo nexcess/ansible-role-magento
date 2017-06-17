@@ -87,6 +87,9 @@
   shell: >
     ./magento setup:install 
     --base-url={{ magento_base_url }}
+    --base-url-secure={{ magento_base_url }}
+    --use-secure=1
+    --use-secure-admin=1
     --db-host={{ magento_db_host }} 
     --db-name={{ magento_db_name }}
     --db-user={{ magento_db_user }}
