@@ -11,6 +11,7 @@ magento_deploy_branch: "{{ nex_app_git_branch | default('master') }}"
 
 magento_project_name: "magento/project-community-edition"
 magento_base_url: "http://{{ nex_app_domain }}/"
+magento_base_url_secure: "https://{{ nex_app_domain }}/"
 magento_db_host: "{{ db_backnet_addrs[0] }}"
 magento_db_name: "{{ nex_app_db_name }}"
 magento_db_user: "{{ nex_app_db_user }}"

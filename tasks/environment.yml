@@ -1,0 +1,14 @@
+---
+
+- name: Copy Varnish VCL.
+  template:
+    src: "{{ varnish_vcl_template }}"
+    dest: "{{ varnish_config_path }}/default.vcl"
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - server_role == "varnish" 
+    - not varnish_use_default_vcl
+  notify: restart varnish
+
