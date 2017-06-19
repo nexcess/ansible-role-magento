@@ -58,7 +58,7 @@
   sudo_user: "{{ nex_app_unix_user }}"
   when:
     - inventory_hostname == groups['fs'][0]
-    - magento_deploy_sample_data
+    - magento_deploy_sample_data|bool
 
 - name: Install Composer var/composer_home/auth.json
   template:
@@ -69,7 +69,7 @@
   sudo_user: "{{ nex_app_unix_user }}"
   when:
     - inventory_hostname == groups['fs'][0]
-    - magento_deploy_sample_data
+    - magento_deploy_sample_data|bool
     
 - name: Deploy Sample Data
   shell: ./magento sampledata:deploy
@@ -81,7 +81,7 @@
     - inventory_hostname == groups['fs'][0]
     - magento_fresh_install
     - doc_root_contents.stdout == ""
-    - magento_deploy_sample_data
+    - magento_deploy_sample_data|bool
 
 - name: Magento Fresh Install
   shell: >
@@ -113,17 +113,28 @@
     - doc_root_contents.stdout == ""
     - magento_fresh_install
 
+- name: Give user access to SSH_AUTH_SOCK dir
+  shell: setfacl -m u:{{ nex_app_unix_user }}:x $(dirname $SSH_AUTH_SOCK)
+  when:
+    - not magento_fresh_install|bool
+
+- name: Give user access to SSH_AUTH_SOCK
+  shell: setfacl -m u:{{ nex_app_unix_user }}:rwx $SSH_AUTH_SOCK
+  when:
+    - not magento_fresh_install|bool
+
 - name: Update/Clone Client Repository
   git:
     repo="{{ magento_client_repo }}"
     dest="{{ nex_app_doc_root }}"
     version="{{ magento_deploy_branch }}"
     force="yes"
-  sudo: yes
-  sudo_user: "{{ nex_app_unix_user }}"
+  become: true
+  become_user: "{{ nex_app_unix_user }}"
+  become_flags: "-E"
   when: 
     - inventory_hostname == groups['fs'][0]
-    - not magento_fresh_install
+    - not magento_fresh_install|bool
 
 - name: Run Composer Install
   composer:
@@ -133,7 +144,7 @@
   sudo_user: "{{ nex_app_unix_user }}"
   when:
     - inventory_hostname == groups['fs'][0]
-    - not magento_fresh_install
+    - not magento_fresh_install|bool
 
 - name: Fix Perms
   shell: find var vendor pub/static pub/media app/etc -type f -exec chmod u+w {} \; && find var vendor pub/static pub/media app/etc -type d -exec chmod u+w {} \; && chmod u+x bin/magento
@@ -143,7 +154,7 @@
   sudo_user: "{{ nex_app_unix_user }}"
   when:
     - inventory_hostname == groups['fs'][0]
-    - not magento_fresh_install
+    - not magento_fresh_install|bool
 
 - name: Generate app/etc/config.php
   shell: ./magento module:enable --all
@@ -154,12 +165,12 @@
   sudo_user: "{{ nex_app_unix_user }}"
   when:
     - inventory_hostname == groups['fs'][0]
-    - not magento_fresh_install
+    - not magento_fresh_install|bool
     
 - name: Generate app/etc/env.php
   template:
     src="env.php.j2"
-    dest="{{ nex_app_doc_root }}/app/etc/env.php"
+    dest="{{ nex_app_doc_root }}/app/etc/env.php" 
   sudo: yes
   sudo_user: "{{ nex_app_unix_user }}"
   when:
