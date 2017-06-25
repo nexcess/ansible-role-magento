@@ -19,7 +19,7 @@
   template:
     src="auth.json.j2"
     dest="{{ nex_app_unix_home }}/.composer/auth.json"
-    mode="0644"
+    mode=0644
   sudo: yes
   sudo_user: "{{ nex_app_unix_user }}"
   when:

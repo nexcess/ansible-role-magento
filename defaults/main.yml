@@ -1,4 +1,5 @@
 ---
+
 magento_public_key: "{{ nex_app_magento_public_key }}"
 magento_private_key: "{{ nex_app_magento_private_key }}"
 magento_crypt_key: ""
