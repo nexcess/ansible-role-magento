@@ -1,0 +1,28 @@
+---
+
+magento_public_key: "{{ nex_app_magento_public_key }}"
+magento_private_key: "{{ nex_app_magento_private_key }}"
+magento_crypt_key: ""
+
+magento_fresh_install: false
+magento_deploy_sample_data: false
+
+magento_client_repo: "{{ nex_app_git_repo }}"
+magento_deploy_branch: "{{ nex_app_git_branch | default('master') }}"
+
+magento_project_name: "magento/project-community-edition"
+magento_base_url: "http://{{ nex_app_domain }}/"
+magento_base_url_secure: "https://{{ nex_app_domain }}/"
+magento_db_host: "{{ db_backnet_addrs[0] }}"
+magento_db_name: "{{ nex_app_db_name }}"
+magento_db_user: "{{ nex_app_db_user }}"
+magento_db_pass: "{{ nex_app_db_pass }}"
+magento_admin_firstname: "Magento"
+magento_admin_lastname: "User"
+magento_admin_email: "example@user.com"
+magento_admin_user: "admin"
+magento_admin_pass: "111please/override/me222"
+magento_backend_frontname: "admin"
+magento_lang: "en_US"
+magento_currency: "USD"
+magento_timezone: "{{ ntp_timezone }}"

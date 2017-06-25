@@ -1,0 +1,7 @@
+---
+
+- include: deploy.yml
+  when: mode == "deploy"
+
+- include: environment.yml
+  when: mode == "env"
