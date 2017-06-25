@@ -1,0 +1,31 @@
+---
+
+## php vars
+php_prefix: "php70u"
+
+php_base_packages:
+  - "php-xml"
+  - "php-cli"
+  - "php-pdo"
+  - "php-gmp"
+  - "runtime"
+  - "php-json"
+  - "php-snmp"
+  - "php-pear"
+  - "php-devel"
+  - "php-mcrypt"
+  - "php-common"
+  - "php-process"
+  - "php-mysqlnd"
+  - "php-opcache"
+  - "php-mbstring"
+  - "php-gd"
+  - "php-intl"
+
+php_pecl_modules:
+  - "php-pecl-zip"
+
+# Varish vars
+varnish_config_path: /etc/varnish
+varnish_use_default_vcl: false
+varnish_vcl_template: "varnish.vcl.j2"
