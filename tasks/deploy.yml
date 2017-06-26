@@ -1,6 +1,6 @@
 ---
 
-- name: Make Sure ~/.composer exists
+- name: Make Sure ~/.composer Exists
   file:
     path="{{ nex_app_unix_home }}/.composer"
     state="directory"
@@ -9,6 +9,11 @@
   become_user: "{{ nex_app_unix_user }}"
   when:
     - inventory_hostname == groups['fs'][0]
+
+- name: Check for Composer auth.json
+  stat:
+    path="{{ nex_app_unix_home }}/.composer/auth.json"
+  register: composer_auth
 
 - name: Install Composer auth.json
   template:
@@ -19,6 +24,7 @@
   become_user: "{{ nex_app_unix_user }}"
   when:
     - inventory_hostname == groups['fs'][0]
+    - not composer_auth.stat.exists
 
 - name: Register Contents Of Doc Root
   command: "ls {{ nex_app_doc_root }}"
@@ -60,6 +66,11 @@
     - inventory_hostname == groups['fs'][0]
     - magento_deploy_sample_data|bool
 
+- name: Check for var/composer_home Composer auth.json
+  stat:
+    path="{{ nex_app_doc_root}}/var/composer_home/auth.json"
+  register: var_composer_home_auth
+
 - name: Install Composer var/composer_home/auth.json
   template:
     src="auth.json.j2"
@@ -70,7 +81,8 @@
   when:
     - inventory_hostname == groups['fs'][0]
     - magento_deploy_sample_data|bool
-    
+    - not var_composer_home_auth.stat.exists
+
 - name: Deploy Sample Data
   shell: ./magento sampledata:deploy
   args:
@@ -85,25 +97,25 @@
 
 - name: Magento Fresh Install
   shell: >
-    ./magento setup:install 
+    ./magento setup:install
     --base-url={{ magento_base_url }}
     --base-url-secure={{ magento_base_url_secure }}
-    --db-host={{ magento_db_host }} 
+    --db-host={{ magento_db_host }}
     --db-name={{ magento_db_name }}
     --db-user={{ magento_db_user }}
     --db-password={{ magento_db_pass }}
-    --admin-firstname={{ magento_admin_firstname }} 
-    --admin-lastname={{ magento_admin_lastname }} 
+    --admin-firstname={{ magento_admin_firstname }}
+    --admin-lastname={{ magento_admin_lastname }}
     --admin-email={{ magento_admin_email }}
     --admin-user={{ magento_admin_user }}
-    --admin-password={{ magento_admin_pass }} 
+    --admin-password={{ magento_admin_pass }}
     --language={{ magento_lang }}
     --currency={{ magento_currency }}
     --timezone={{ magento_timezone }}
     --backend-frontname={{ magento_backend_frontname }}
     --cleanup-database
-    --sales-order-increment-prefix="ORD$" 
-    --session-save=db 
+    --sales-order-increment-prefix="ORD$"
+    --session-save=db
     --use-rewrites=1
   args:
     chdir: "{{ nex_app_doc_root }}/bin"
@@ -137,14 +149,14 @@
   become: true
   become_user: "{{ nex_app_unix_user }}"
   become_flags: "-E"
-  when: 
+  when:
     - inventory_hostname == groups['fs'][0]
     - not magento_fresh_install|bool
 
 - name: Run Composer Install
   composer:
     command="install"
-    working_dir="{{ nex_app_doc_root }}"  
+    working_dir="{{ nex_app_doc_root }}"
   become: yes
   become_user: "{{ nex_app_unix_user }}"
   when:
@@ -171,16 +183,16 @@
   when:
     - inventory_hostname == groups['fs'][0]
     - not magento_fresh_install|bool
-    
+
 - name: Generate app/etc/env.php
   template:
     src="env.php.j2"
-    dest="{{ nex_app_doc_root }}/app/etc/env.php" 
+    dest="{{ nex_app_doc_root }}/app/etc/env.php"
   become: yes
   become_user: "{{ nex_app_unix_user }}"
   when:
     - inventory_hostname == groups['fs'][0]
-    
+
 #- name: Upgrade magento
 #  shell: ./magento setup:upgrade
 #  args:
@@ -192,20 +204,20 @@
 #    - not magento_fresh_install
 
 #- name: Download Magento
-#  get_url: 
+#  get_url:
 #    url={{ magento_url }}
 #    dest=/tmp/magento.tar.gz
 #    mode=0644
 #  when:
-#    - server_role == "fs"    
+#    - server_role == "fs"
 #
 #- name: Unarchive Magento
-#  command: > 
-#    tar 
-#    --strip 1 
-#    -xvzf 
+#  command: >
+#    tar
+#    --strip 1
+#    -xvzf
 #    /tmp/magento.tar.gz
-#    chdir="{{ nfs_shared_path }}/{{ nex_app_dest }}" 
+#    chdir="{{ nfs_shared_path }}/{{ nex_app_dest }}"
 #    creates="{{ nfs_shared_path }}/{{ nex_app_dest }}/index.php"
 #  become: yes
 #  become_user: "{{ nex_app_unix_user }}"
@@ -215,7 +227,7 @@
 #- name: Run Composer Install
 #  composer:
 #    command="install"
-#    working_dir="{{ nex_app_root }}/{{ nex_app_dest }}"  
+#    working_dir="{{ nex_app_root }}/{{ nex_app_dest }}"
 #  become: yes
 #  become_user: "{{ nex_app_unix_user }}"
 #  when:
