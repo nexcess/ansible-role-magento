@@ -184,13 +184,24 @@
     - inventory_hostname == groups['fs'][0]
     - not magento_fresh_install|bool
 
-- name: Generate app/etc/env.php
+- name: Generate app/etc/env.php (with redis)
+  template:
+    src="env.redis.php.j2"
+    dest="{{ nex_app_doc_root }}/app/etc/env.php"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - lb_redis_backnet_addrs is defined
+    - inventory_hostname == groups['fs'][0]
+
+- name: Generate app/etc/env.php (without redis)
   template:
     src="env.php.j2"
     dest="{{ nex_app_doc_root }}/app/etc/env.php"
   become: yes
   become_user: "{{ nex_app_unix_user }}"
   when:
+    - lb_redis_backnet_addrs is not defined
     - inventory_hostname == groups['fs'][0]
 
 #- name: Upgrade magento
