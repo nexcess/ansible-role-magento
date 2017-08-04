@@ -1,0 +1,46 @@
+---
+
+- name: Run Composer Install
+  composer:
+    command="install"
+    working_dir="{{ nex_app_build_code_base }}"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+ 
+- name: Fix Perms
+  shell: find var vendor pub/static pub/media app/etc -type f -exec chmod u+w {} \; && find var vendor pub/static pub/media app/etc -type d -exec chmod u+w {} \; && chmod u+x bin/magento
+  args:
+    chdir: "{{ nex_app_build_code_base }}"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+
+- name: Generate app/etc/config.php
+  shell: ./magento module:enable --all
+  args:
+    chdir: "{{ nex_app_build_code_base }}/bin"
+    creates: "{{ nex_app_build_code_base }}/app/etc/config.php"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+
+- name: Generate app/etc/env.php (with redis)
+  template:
+    src="env.redis.php.j2"
+    dest="{{ nex_app_build_code_base }}/app/etc/env.php"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - lb_redis_backnet_addrs is defined
+
+- name: Generate app/etc/env.php (without redis)
+  template:
+    src="env.php.j2"
+    dest="{{ nex_app_build_code_base }}/app/etc/env.php"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - lb_redis_backnet_addrs is not defined
+
+- name: Run di:compile
+  command: bin/magento setup:di:compile    
+    chdir="{{ nex_app_build_code_base }}"
+
