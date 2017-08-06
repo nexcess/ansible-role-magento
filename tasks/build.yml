@@ -1,0 +1,36 @@
+---
+
+- name: Make Sure ~/.composer Exists
+  file:
+    path="{{ nex_app_unix_home }}/.composer"
+    state="directory"
+    mode=2751
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+
+- name: Check for Composer auth.json
+  stat:
+    path="{{ nex_app_unix_home }}/.composer/auth.json"
+  register: composer_auth
+
+- name: Install Composer auth.json
+  template:
+    src="auth.json.j2"
+    dest="{{ nex_app_unix_home }}/.composer/auth.json"
+    mode="0644"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - not composer_auth.stat.exists
+
+- include: _normal-build.yml
+  static: no
+  when: 
+    - magento_fresh_install is undefined or magento_fresh_install == false
+
+- include: _fresh-install.yml
+  static: no
+  when:
+    - magento_fresh_install is defined
+    - magento_fresh_install == true
+

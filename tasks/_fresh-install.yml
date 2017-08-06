@@ -1,0 +1,105 @@
+---
+
+- name: Register Contents Of Doc Root
+  command: "ls {{ nex_app_build_code_base }}"
+  register: doc_root_contents
+
+- name: Create Magento Project
+  composer:
+    command="create-project"
+    arguments="--repository-url=https://repo.magento.com/ {{ magento_project_name }} {{ nex_app_build_code_base }}"
+    working_dir="{{ nex_app_unix_home }}"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - doc_root_contents.stdout == ""
+
+- name: Fix Perms
+  shell: find var vendor pub/static pub/media app/etc -type f -exec chmod u+w {} \; && find var vendor pub/static pub/media app/etc -type d -exec chmod u+w {} \; && chmod u+x bin/magento
+  args:
+    chdir: "{{ nex_app_build_code_base }}"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - doc_root_contents.stdout == ""
+
+- name: Make Sure var/composer_home Exists
+  file:
+    path="{{ nex_app_build_code_base }}/var/composer_home"
+    state="directory"
+    mode=2751
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+
+- name: Check for var/composer_home Composer auth.json
+  stat:
+    path="{{ nex_app_build_code_base }}/var/composer_home/auth.json"
+  register: var_composer_home_auth
+
+- name: Install Composer var/composer_home/auth.json
+  template:
+    src="auth.json.j2"
+    dest="{{ nex_app_build_code_base }}/var/composer_home/auth.json"
+    mode="0644"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - not var_composer_home_auth.stat.exists
+
+- name: Deploy Sample Data
+  shell: ./magento sampledata:deploy
+  args:
+    chdir: "{{ nex_app_build_code_base }}/bin"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - doc_root_contents.stdout == ""
+    - magento_deploy_sample_data|bool
+
+- name: Magento Fresh Install
+  shell: >
+    ./magento setup:install
+    --base-url={{ magento_base_url }}
+    --base-url-secure={{ magento_base_url_secure }}
+    --db-host={{ magento_db_host }}
+    --db-name={{ magento_db_name }}
+    --db-user={{ magento_db_user }}
+    --db-password={{ magento_db_pass }}
+    --admin-firstname={{ magento_admin_firstname }}
+    --admin-lastname={{ magento_admin_lastname }}
+    --admin-email={{ magento_admin_email }}
+    --admin-user={{ magento_admin_user }}
+    --admin-password={{ magento_admin_pass }}
+    --language={{ magento_lang }}
+    --currency={{ magento_currency }}
+    --timezone={{ magento_timezone }}
+    --backend-frontname={{ magento_backend_frontname }}
+    --cleanup-database
+    --sales-order-increment-prefix="ORD$"
+    --session-save=db
+    --use-rewrites=1
+  args:
+    chdir: "{{ nex_app_build_code_base }}/bin"
+  become: true
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - doc_root_contents.stdout == ""
+
+- name: Generate app/etc/env.php (with redis)
+  template:
+    src="env.redis.php.j2"
+    dest="{{ nex_app_build_code_base }}/app/etc/env.php"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - lb_redis_backnet_addrs is defined
+
+- name: Generate app/etc/env.php (without redis)
+  template:
+    src="env.php.j2"
+    dest="{{ nex_app_build_code_base }}/app/etc/env.php"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - lb_redis_backnet_addrs is not defined
+
