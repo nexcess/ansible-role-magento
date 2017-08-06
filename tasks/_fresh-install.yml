@@ -23,7 +23,7 @@
   when:
     - doc_root_contents.stdout == ""
 
-- name: Make Sure var/composer_home exists
+- name: Make Sure var/composer_home Exists
   file:
     path="{{ nex_app_build_code_base }}/var/composer_home"
     state="directory"
