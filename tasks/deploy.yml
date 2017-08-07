@@ -1,20 +1,31 @@
 ---
 
+- name: Set Fact nex_app_shared_mounts
+  set_fact:
+    nex_app_shared_mounts:
+      - var
+      - app/etc
+      - pub/media
+      - pub/static
+
 - name: Run setup:upgrade
   command: bin/magento setup:upgrade
     chdir="{{ nex_app_build_code_base }}"
   when:
     - inventory_hostname == groups['fpm'][0]
+    - magento_upgrade == true
 
 - name: Run cache:clean
   command: bin/magento cache:clean
     chdir="{{ nex_app_build_code_base }}"
   when:
     - inventory_hostname == groups['fpm'][0]
+    - magento_clean_cache == true
 
 - name: Run deploy:mode:set production
   command: bin/magento deploy:mode:set production
     chdir="{{ nex_app_build_code_base }}"
   when:
     - inventory_hostname == groups['fpm'][0]
-  
+    - magento_set_mode == true
+
