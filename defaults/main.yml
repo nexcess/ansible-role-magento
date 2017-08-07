@@ -29,3 +29,8 @@ magento_timezone: "{{ ntp_timezone }}"
 magento_upgrade: true
 magento_clean_cache: true
 magento_set_mode: true
+magento_shared_mounts:
+  - var
+  - app/etc
+  - pub/media
+  - pub/static

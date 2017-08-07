@@ -2,11 +2,7 @@
 
 - name: Set Fact nex_app_shared_mounts
   set_fact:
-    nex_app_shared_mounts:
-      - var
-      - app/etc
-      - pub/media
-      - pub/static
+    nex_app_shared_mounts="{{ magento_shared_mounts }}"
 
 - name: Run setup:upgrade
   command: bin/magento setup:upgrade
