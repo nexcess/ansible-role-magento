@@ -32,6 +32,6 @@ varnish_vcl_template: "varnish.vcl.j2"
 
 # Redis vars
 # Set a max memory limit for redis, limit to 80% of available memory
-redis_maxmemory: "{{ (ansible_memtotal_mb * .8) | int }}mb"
+#redis_maxmemory: "{{ (ansible_memtotal_mb * .8) | int }}mb"
 # Set the eviction policy to lru
 redis_maxmemory_policy: "allkeys-lru"
