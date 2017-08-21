@@ -4,24 +4,49 @@
   set_fact:
     nex_app_shared_mounts="{{ magento_shared_mounts }}"
 
-- name: Run setup:upgrade
-  command: bin/magento setup:upgrade
-    chdir="{{ nex_app_build_code_base }}"
+- name: Run maintenace:enable
+  command: bin/magento maintenance:enable
+  args:
+    chdir: "{{ nex_app_build_code_base }}"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
   when:
-    - inventory_hostname == groups['fpm'][0]
+    - server_role == "fpm"
+
+- name: Reset Sample Data
+  command: bin/magento sampledata:reset
+  args:
+    chdir: "{{ nex_app_build_code_base }}"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - inventory_hostname == groups['fs'][0]
+    - magento_use_sample_data is defined
+    - magento_use_sample_data == true
+
+- name: Run setup:upgrade
+  command: bin/magento setup:upgrade {{ "--keep-generated" if magento_deploy_mode == "production" }}
+    chdir="{{ nex_app_build_code_base }}"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - inventory_hostname == groups['fs'][0]
     - magento_upgrade == true
 
-- name: Run cache:clean
-  command: bin/magento cache:clean
+- name: Run cache:flush
+  command: bin/magento cache:flush
     chdir="{{ nex_app_build_code_base }}"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
   when:
-    - inventory_hostname == groups['fpm'][0]
+    - inventory_hostname == groups['fs'][0]
     - magento_clean_cache == true
 
-- name: Run deploy:mode:set production
-  command: bin/magento deploy:mode:set production
-    chdir="{{ nex_app_build_code_base }}"
+- name: Run maintenace:disable
+  command: bin/magento maintenance:disable
+  args:
+    chdir: "{{ nex_app_build_code_base }}"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
   when:
-    - inventory_hostname == groups['fpm'][0]
-    - magento_set_mode == true
-
+    - server_role == "fpm"
