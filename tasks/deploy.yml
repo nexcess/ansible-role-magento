@@ -25,7 +25,7 @@
     - magento_use_sample_data == true
 
 - name: Run setup:upgrade
-  command: bin/magento setup:upgrade {{ "--keep-generated" if magento_deploy_mode == "production" }}
+  command: bin/magento setup:upgrade {{ "--keep-generated" if magento_deploy_mode == "production" else "" }}
     chdir="{{ nex_app_build_code_base }}"
   become: yes
   become_user: "{{ nex_app_unix_user }}"
