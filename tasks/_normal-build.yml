@@ -68,5 +68,6 @@
     chdir="{{ nex_app_build_code_base }}"
   when:
     - inventory_hostname == groups['fs'][0]
+    - magento_set_mode == true
   become: yes
   become_user: "{{ nex_app_unix_user }}"
