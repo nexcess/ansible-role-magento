@@ -54,7 +54,7 @@
   become_user: "{{ nex_app_unix_user }}"
   when:
     - doc_root_contents.stdout == ""
-    - magento_deploy_sample_data|bool
+    - magento_use_sample_data|bool
 
 - name: Magento Fresh Install
   shell: >

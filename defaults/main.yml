@@ -16,7 +16,7 @@ magento_base_url_secure: "https://{{ nex_app_domain }}/"
 magento_db_host: "{{ db_backnet_addrs[0] }}"
 magento_db_name: "{{ nex_app_db_name | default('magento') }}"
 magento_db_user: "{{ nex_app_db_user | default('magento') }}"
-magento_db_pass: "{{ nex_app_db_pass }}"
+magento_db_pass: "{{ nex_app_db_pass_override | default(nex_app_db_pass) }}"
 magento_admin_firstname: "Magento"
 magento_admin_lastname: "User"
 magento_admin_email: "example@user.com"
@@ -28,7 +28,7 @@ magento_currency: "USD"
 magento_timezone: "{{ ntp_timezone }}"
 magento_upgrade: true
 magento_clean_cache: true
-magento_set_mode: true
+magento_use_sample_data: false
 magento_shared_mounts:
   - var
   - app/etc

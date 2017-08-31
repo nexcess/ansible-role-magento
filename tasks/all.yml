@@ -1,0 +1,13 @@
+---
+- name: Set magento_deploy_mode to "production"
+  set_fact:
+    magento_deploy_mode: "production"
+  when:
+    - nex_env == "production"
+
+- name: Set magento_deploy_mode to "developer"
+  set_fact:
+    magento_deploy_mode: "developer"
+  when:
+    - nex_env != "production"
+

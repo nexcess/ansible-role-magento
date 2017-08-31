@@ -14,6 +14,29 @@
   become: yes
   become_user: "{{ nex_app_unix_user }}"
 
+- name: Make Sure var/composer_home Exists
+  file:
+    path="{{ nex_app_build_code_base }}/var/composer_home"
+    state="directory"
+    mode=2751
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+
+- name: Check for var/composer_home Composer auth.json
+  stat:
+    path="{{ nex_app_build_code_base }}/var/composer_home/auth.json"
+  register: var_composer_home_auth
+
+- name: Install Composer var/composer_home/auth.json
+  template:
+    src="auth.json.j2"
+    dest="{{ nex_app_build_code_base }}/var/composer_home/auth.json"
+    mode="0644"
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"
+  when:
+    - not var_composer_home_auth.stat.exists
+
 - name: Generate app/etc/config.php
   shell: ./magento module:enable --all
   args:
@@ -40,7 +63,10 @@
   when:
     - lb_redis_backnet_addrs is not defined
 
-- name: Run di:compile
-  command: bin/magento setup:di:compile    
+- name: Run deploy:mode:set production|developer
+  command: bin/magento deploy:mode:set {{ magento_deploy_mode }}
     chdir="{{ nex_app_build_code_base }}"
-
+  when:
+    - inventory_hostname == groups['fs'][0]
+  become: yes
+  become_user: "{{ nex_app_unix_user }}"

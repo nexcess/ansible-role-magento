@@ -1,13 +1,11 @@
 ---
+- include: all.yml
 
 - include: environment.yml
   when: mode == "env"
 
 - include: build.yml
   when: mode == "build"
-
-- include: fresh-install.yml
-  when: mode == "fresh-install"
 
 - include: deploy.yml
   when: mode == "deploy"
