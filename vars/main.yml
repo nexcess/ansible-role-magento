@@ -1,7 +1,7 @@
 ---
 
 ## php vars
-php_prefix: "php70u"
+php_prefix: "php70"
 
 php_base_packages:
   - "php-xml"
