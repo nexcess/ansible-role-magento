@@ -21,6 +21,7 @@ php_base_packages:
   - "php-mbstring"
   - "php-gd"
   - "php-intl"
+  - "php-soap"
 
 php_pecl_modules:
   - "php-pecl-zip"
